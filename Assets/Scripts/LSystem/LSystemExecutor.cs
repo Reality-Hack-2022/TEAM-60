@@ -48,6 +48,7 @@ public class LSystemExecutor : MonoBehaviour
     public bool useColliders = false;
 
 
+    public LSystemInterpreter Interpreter;
     public TMPro.TextMeshProUGUI DebugInfo;
 
 
@@ -97,14 +98,24 @@ public class LSystemExecutor : MonoBehaviour
     {
         for(int i = transform.childCount-1; i>=0; i--)
         {
-            Destroy(transform.GetChild(i).gameObject);
+            var child = transform.GetChild(i);
+            var container = child.GetComponent<PartContainer>();
+            if (container != null)
+            {
+                container.DisableAllItems();
+            }
+            else
+            {
+
+                Destroy(transform.GetChild(i).gameObject);
+            }
         }
     }
 
     private void BuildTree()
     {
         GameObject leaves, trunk;
-        LSystemInterpreter.Interpret(
+        Interpreter.Interpret(
             segmentAxialSamples,
             segmentRadialSamples,
             segmentWidth,

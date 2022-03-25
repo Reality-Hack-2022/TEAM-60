@@ -2,9 +2,9 @@
 using System;
 using System.Collections.Generic;
 
-public static class LSystemInterpreter
+public class LSystemInterpreter : MonoBehaviour
 {
-    private struct Turtle
+    public struct Turtle
     {
         public Quaternion direction;
         public Vector3 position;
@@ -46,7 +46,42 @@ public static class LSystemInterpreter
 
     }
 
-    static void CreateSegment(
+
+
+    public PartContainer LeafContainer;
+    public PartContainer BranchContainer;
+
+    public void Start()
+    {
+        
+    }
+
+
+    public void CreateSegment(int segmentAxisSamples,
+        int segmentRadialSamples,
+        float segmentWidth,
+        float segmentHeight,
+        bool narrowBranches,
+        Material trunkMaterial,
+        Turtle turtle,
+        int nestingLevel,
+        ref Mesh currentMesh,
+        ref int chunkCount,
+        GameObject trunk,
+        Dictionary<int, Mesh> segmentsCache)
+    {
+        var branch = BranchContainer.GetInstance();
+        branch.transform.position = turtle.position;
+        branch.transform.rotation = turtle.direction;
+
+        float thickness = (narrowBranches) ? segmentWidth * (0.5f / (nestingLevel + 1)) : segmentWidth * 0.5f;
+
+        branch.transform.localScale = new Vector3(thickness, segmentHeight, thickness);
+
+
+    }
+
+    public void CreateSegmentProcedural(
         int segmentAxisSamples,
         int segmentRadialSamples,
         float segmentWidth,
@@ -119,7 +154,7 @@ public static class LSystemInterpreter
         currentMesh.Optimize();
     }
 
-    static void AddFoliageAt(
+    public void AddFoliageAt(
         float segmentWidth,
         float segmentHeight,
         int leafAxialDensity,
@@ -138,15 +173,20 @@ public static class LSystemInterpreter
         {
             for (int j = 0; j < leafRadialDensity; j++, yAngle += yAngleStep)
             {
-                GameObject leaf = (GameObject)GameObject.Instantiate(leafBillboard, Vector3.zero, turtle.direction);
-                leaf.transform.parent = leaves.transform;
+
+                var leaf = LeafContainer.GetInstance();
+                leaf.transform.position = Vector3.zero;
+                leaf.transform.rotation = turtle.direction;
+                                
+                //GameObject leaf = (GameObject)GameObject.Instantiate(leafBillboard, Vector3.zero, turtle.direction);
+                //leaf.transform.parent = leaves.transform;
                 leaf.transform.position = turtle.position - (turtle.direction * new Vector3(0, y, 0));
                 leaf.transform.Rotate(new Vector3(xAngle, yAngle, 0));
             }
         }
     }
 
-    static void CreateNewChunk(Mesh mesh, ref int count, Material trunkMaterial, GameObject trunk)
+    public void CreateNewChunk(Mesh mesh, ref int count, Material trunkMaterial, GameObject trunk)
     {
         GameObject chunk = new GameObject("Chunk " + (++count));
         chunk.transform.parent = trunk.transform;
@@ -155,7 +195,7 @@ public static class LSystemInterpreter
         chunk.AddComponent<MeshFilter>().mesh = mesh;
     }
 
-    static GameObject CreateLeafBillboard(float leafSize, Material leafMaterial)
+    public static GameObject CreateLeafBillboard(float leafSize, Material leafMaterial)
     {
         GameObject leafBillboard = new GameObject("Leaf");
         leafBillboard.AddComponent<MeshRenderer>().sharedMaterial = leafMaterial;
@@ -163,7 +203,7 @@ public static class LSystemInterpreter
         return leafBillboard;
     }
 
-    public static void Interpret(
+    public void Interpret(
         int segmentAxisSamples,
         int segmentRadialSamples,
         float segmentWidth,
