@@ -61,13 +61,9 @@ public class ManualTree : MonoBehaviour
         DeleteTree();
 
 
-        GameObject leaves, trunk;
         Interpreter.Interpret(
-            null, null,
             Angle,
-            TreeDefinition,
-            out leaves,
-            out trunk);
+            TreeDefinition);
 
     }
 

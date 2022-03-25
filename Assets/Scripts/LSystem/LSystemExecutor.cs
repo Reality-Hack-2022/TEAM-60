@@ -7,45 +7,8 @@ public class LSystemExecutor : MonoBehaviour
     public string axiom;
     public float angle = 22.5f;
     public int derivations = 3;
-    /// <summary>
-    /// number of triangles per length of branch, no visual effect
-    /// </summary>
-    public int segmentAxialSamples = 3;
-    /// <summary>
-    /// number of triangles around branch, no visual effect as long as there are enough
-    /// </summary>
-    public int segmentRadialSamples = 3;
-    /// <summary>
-    /// Thickness of branches
-    /// </summary>
-    public float segmentWidth = 0.5f;
-    /// <summary>
-    /// Length of branches
-    /// </summary>
-    public float segmentHeight = 2.0f;
-    /// <summary>
-    /// Size of leaves
-    /// </summary>
-    public float leafSize;
-    /// <summary>
-    /// Number of leaves along one branch
-    /// </summary>
-    public int leafAxialDensity = 1;
-    /// <summary>
-    /// Number of leaves around one branch
-    /// </summary>
-    public int leafRadialDensity = 1;
-    /// <summary>
-    /// Are leaves rendered?
-    /// </summary>
-    public bool useFoliage;
-    /// <summary>
-    /// Branches get narrower further down the hierarchy
-    /// </summary>
-    public bool narrowBranches = true;
-    public Material trunkMaterial;
-    public Material leafMaterial;
-    public bool useColliders = false;
+
+    //public bool useColliders = false;
 
 
     public LSystemInterpreter Interpreter;
@@ -114,35 +77,24 @@ public class LSystemExecutor : MonoBehaviour
 
     private void BuildTree()
     {
-        GameObject leaves, trunk;
         Interpreter.Interpret(
-            leafMaterial,
-            trunkMaterial,
             angle,
-            moduleString,
-            out leaves,
-            out trunk);
+            moduleString);
 
-        leaves.transform.parent = transform;
-        leaves.transform.localPosition = Vector3.zero;
-        trunk.transform.parent = transform;
-        trunk.transform.localPosition = Vector3.zero;
-
-        if(useColliders)
-        {
-            UpdateColliderBounds(trunk);
-        }
+        //if(useColliders)
+        //{
+        //    UpdateColliderBounds(trunk);
+        //}
 
         DebugInfo.text = $"Rule: {rule}\n" +
             $"Axiom: {axiom}\n" +
             $"Derivations: {currentDerivations}\n" +
             $"Angle: {rule}\n" +
-            $"Segment Axial Samples: {segmentAxialSamples}\n" +
-            $"Rule: {segmentRadialSamples}\n" +
-             $"Segment Axial Samples: {segmentAxialSamples}\n" +
-             $"Segment Width/Height: {segmentWidth} {segmentHeight}\n" +
-             $"Leaf Size: {leafSize}\n" +
-             $"Leaf Axial Density: {leafAxialDensity}\n\n" +
+            $"Rule: {Interpreter.segmentRadialSamples}\n" +
+             $"Segment Axial Samples: {Interpreter.segmentAxisSamples}\n" +
+             $"Segment Width/Height: {Interpreter.segmentWidth} {Interpreter.segmentHeight}\n" +
+             $"Leaf Size: {Interpreter.leafSize}\n" +
+             $"Leaf Axial Density: {Interpreter.leafAxialDensity}\n\n" +
              $"{moduleString}";
     }
 

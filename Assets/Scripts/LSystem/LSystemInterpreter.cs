@@ -47,15 +47,42 @@ public class LSystemInterpreter : MonoBehaviour
     }
 
 
-    public int segmentAxisSamples = 6;
-    public int segmentRadialSamples = 6;
+    /// <summary>
+    /// number of triangles per length of branch, no visual effect
+    /// </summary>
+    public int segmentAxisSamples = 3;
+    /// <summary>
+    /// number of triangles around branch, no visual effect as long as there are enough
+    /// </summary>
+    public int segmentRadialSamples = 3;
+    /// <summary>
+    /// Thickness of branches
+    /// </summary>
     public float segmentWidth = 0.5f;
+    /// <summary>
+    /// Length of branches
+    /// </summary>
     public float segmentHeight = 2.0f;
-    public float leafSize = 1;
-    public float leafAxialDensity = 2;
-    public float leafRadialDensity = 2;
+    /// <summary>
+    /// Size of leaves
+    /// </summary>
+    public float leafSize;
+    /// <summary>
+    /// Number of leaves along one branch
+    /// </summary>
+    public int leafAxialDensity = 1;
+    /// <summary>
+    /// Number of leaves around one branch
+    /// </summary>
+    public int leafRadialDensity = 1;
+    /// <summary>
+    /// Are leaves rendered?
+    /// </summary>
+    public bool useFoliage;
+    /// <summary>
+    /// Branches get narrower further down the hierarchy
+    /// </summary>
     public bool narrowBranches = true;
-    public bool useFoliage = true;
 
     public PartContainer LeafContainer;
     public PartContainer BranchContainer;
@@ -66,13 +93,7 @@ public class LSystemInterpreter : MonoBehaviour
     }
 
 
-    public void CreateSegment(Material trunkMaterial,
-        Turtle turtle,
-        int nestingLevel,
-        ref Mesh currentMesh,
-        ref int chunkCount,
-        GameObject trunk,
-        Dictionary<int, Mesh> segmentsCache)
+    public void CreateSegment(Turtle turtle, int nestingLevel)
     {
         var branch = BranchContainer.GetInstance();
         branch.transform.localPosition = turtle.position;
@@ -154,9 +175,7 @@ public class LSystemInterpreter : MonoBehaviour
     }
 
     public void AddFoliageAt(
-        Turtle turtle,
-        GameObject leafBillboard,
-        GameObject leaves)
+        Turtle turtle)
     {
         float xAngleStep = -70 / (float)leafAxialDensity,
             xAngle = xAngleStep * (leafAxialDensity - 1) - 20,
@@ -172,7 +191,7 @@ public class LSystemInterpreter : MonoBehaviour
                 var leaf = LeafContainer.GetInstance();
                 leaf.transform.localPosition = Vector3.zero;
                 leaf.transform.localRotation = turtle.direction;
-                                
+
                 //GameObject leaf = (GameObject)GameObject.Instantiate(leafBillboard, Vector3.zero, turtle.direction);
                 //leaf.transform.parent = leaves.transform;
                 leaf.transform.localPosition = turtle.position - (turtle.direction * new Vector3(0, y, 0));
@@ -199,17 +218,10 @@ public class LSystemInterpreter : MonoBehaviour
     }
 
     public void Interpret(
-        Material leafMaterial,
-        Material trunkMaterial,
         float angle,
-        string moduleString,
-        out GameObject leaves,
-        out GameObject trunk)
+        string moduleString)
     {
-        leaves = new GameObject("Leaves");
-        trunk = new GameObject("Trunk");
-
-        GameObject leafBillboard = CreateLeafBillboard(leafSize, leafMaterial);
+        //GameObject leafBillboard = CreateLeafBillboard(leafSize, leafMaterial);
 
         int chunkCount = 0;
         Mesh currentMesh = new Mesh();
@@ -222,13 +234,8 @@ public class LSystemInterpreter : MonoBehaviour
             if (module == "F")
             {
                 CreateSegment(
-                    trunkMaterial,
                     current,
-                    stack.Count,
-                    ref currentMesh,
-                    ref chunkCount,
-                    trunk,
-                    segmentsCache);
+                    stack.Count);
                 current.Forward();
             }
             else if (module == "+")
@@ -268,14 +275,12 @@ public class LSystemInterpreter : MonoBehaviour
             {
                 if (useFoliage)
                     AddFoliageAt(
-                        current,
-                        leafBillboard,
-                        leaves);
+                        current);
                 current = stack.Pop();
             }
         }
-        CreateNewChunk(currentMesh, ref chunkCount, trunkMaterial, trunk);
-        GameObject.Destroy(leafBillboard);
+        //CreateNewChunk(currentMesh, ref chunkCount, trunkMaterial, trunk);
+        //GameObject.Destroy(leafBillboard);
     }
 
 }
