@@ -47,6 +47,15 @@ public class LSystemInterpreter : MonoBehaviour
     }
 
 
+    public int segmentAxisSamples = 6;
+    public int segmentRadialSamples = 6;
+    public float segmentWidth = 0.5f;
+    public float segmentHeight = 2.0f;
+    public float leafSize = 1;
+    public float leafAxialDensity = 2;
+    public float leafRadialDensity = 2;
+    public bool narrowBranches = true;
+    public bool useFoliage = true;
 
     public PartContainer LeafContainer;
     public PartContainer BranchContainer;
@@ -57,12 +66,7 @@ public class LSystemInterpreter : MonoBehaviour
     }
 
 
-    public void CreateSegment(int segmentAxisSamples,
-        int segmentRadialSamples,
-        float segmentWidth,
-        float segmentHeight,
-        bool narrowBranches,
-        Material trunkMaterial,
+    public void CreateSegment(Material trunkMaterial,
         Turtle turtle,
         int nestingLevel,
         ref Mesh currentMesh,
@@ -71,8 +75,8 @@ public class LSystemInterpreter : MonoBehaviour
         Dictionary<int, Mesh> segmentsCache)
     {
         var branch = BranchContainer.GetInstance();
-        branch.transform.position = turtle.position;
-        branch.transform.rotation = turtle.direction;
+        branch.transform.localPosition = turtle.position;
+        branch.transform.localRotation = turtle.direction;
 
         float thickness = (narrowBranches) ? segmentWidth * (0.5f / (nestingLevel + 1)) : segmentWidth * 0.5f;
 
@@ -82,11 +86,6 @@ public class LSystemInterpreter : MonoBehaviour
     }
 
     public void CreateSegmentProcedural(
-        int segmentAxisSamples,
-        int segmentRadialSamples,
-        float segmentWidth,
-        float segmentHeight,
-        bool narrowBranches,
         Material trunkMaterial,
         Turtle turtle,
         int nestingLevel,
@@ -155,10 +154,6 @@ public class LSystemInterpreter : MonoBehaviour
     }
 
     public void AddFoliageAt(
-        float segmentWidth,
-        float segmentHeight,
-        int leafAxialDensity,
-        int leafRadialDensity,
         Turtle turtle,
         GameObject leafBillboard,
         GameObject leaves)
@@ -175,12 +170,12 @@ public class LSystemInterpreter : MonoBehaviour
             {
 
                 var leaf = LeafContainer.GetInstance();
-                leaf.transform.position = Vector3.zero;
-                leaf.transform.rotation = turtle.direction;
+                leaf.transform.localPosition = Vector3.zero;
+                leaf.transform.localRotation = turtle.direction;
                                 
                 //GameObject leaf = (GameObject)GameObject.Instantiate(leafBillboard, Vector3.zero, turtle.direction);
                 //leaf.transform.parent = leaves.transform;
-                leaf.transform.position = turtle.position - (turtle.direction * new Vector3(0, y, 0));
+                leaf.transform.localPosition = turtle.position - (turtle.direction * new Vector3(0, y, 0));
                 leaf.transform.Rotate(new Vector3(xAngle, yAngle, 0));
             }
         }
@@ -204,15 +199,6 @@ public class LSystemInterpreter : MonoBehaviour
     }
 
     public void Interpret(
-        int segmentAxisSamples,
-        int segmentRadialSamples,
-        float segmentWidth,
-        float segmentHeight,
-        float leafSize,
-        int leafAxialDensity,
-        int leafRadialDensity,
-        bool useFoliage,
-        bool narrowBranches,
         Material leafMaterial,
         Material trunkMaterial,
         float angle,
@@ -236,11 +222,6 @@ public class LSystemInterpreter : MonoBehaviour
             if (module == "F")
             {
                 CreateSegment(
-                    segmentAxisSamples,
-                    segmentRadialSamples,
-                    segmentWidth,
-                    segmentHeight,
-                    narrowBranches,
                     trunkMaterial,
                     current,
                     stack.Count,
@@ -287,10 +268,6 @@ public class LSystemInterpreter : MonoBehaviour
             {
                 if (useFoliage)
                     AddFoliageAt(
-                        segmentWidth,
-                        segmentHeight,
-                        leafAxialDensity,
-                        leafRadialDensity,
                         current,
                         leafBillboard,
                         leaves);

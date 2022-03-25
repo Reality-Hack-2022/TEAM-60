@@ -116,15 +116,6 @@ public class LSystemExecutor : MonoBehaviour
     {
         GameObject leaves, trunk;
         Interpreter.Interpret(
-            segmentAxialSamples,
-            segmentRadialSamples,
-            segmentWidth,
-            segmentHeight,
-            leafSize,
-            leafAxialDensity,
-            leafRadialDensity,
-            useFoliage,
-            narrowBranches,
             leafMaterial,
             trunkMaterial,
             angle,
@@ -151,7 +142,8 @@ public class LSystemExecutor : MonoBehaviour
              $"Segment Axial Samples: {segmentAxialSamples}\n" +
              $"Segment Width/Height: {segmentWidth} {segmentHeight}\n" +
              $"Leaf Size: {leafSize}\n" +
-             $"Leaf Axial Density: {leafAxialDensity}\n";
+             $"Leaf Axial Density: {leafAxialDensity}\n\n" +
+             $"{moduleString}";
     }
 
 

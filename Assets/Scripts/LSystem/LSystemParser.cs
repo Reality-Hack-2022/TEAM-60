@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
+using UnityEngine;
 
 public static class LSystemParser
 {
@@ -24,7 +25,8 @@ public static class LSystemParser
             
         
         if (!ProductionMatcher.CheckProbabilities(productions))
-            throw new Exception("There's one of more production rules with probability < 1");
+            Debug.LogError("There's one of more production rules with probability < 1");
+        //throw new Exception("There's one of more production rules with probability < 1");
 
         return productions;
     }
