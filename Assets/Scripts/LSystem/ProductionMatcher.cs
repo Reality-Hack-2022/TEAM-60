@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using UnityEngine;
 
 public static class ProductionMatcher
 {
@@ -25,12 +26,13 @@ public static class ProductionMatcher
     {
         foreach (var matches in productions.Values)
         {
-            if (matches.Count == 1 && matches[0].probability != 1)
+            if (matches.Count == 1 && !Mathf.Approximately(matches[0].probability, 1))
                 return false;
             float accProbabilities = 0;
             foreach (var match in matches)
                 accProbabilities += match.probability;
-            if (accProbabilities != 1)
+            Debug.Log(accProbabilities);
+            if (!Mathf.Approximately(accProbabilities, 1))
                 return false;
         }
         return true;
