@@ -5,7 +5,7 @@ using UnityEngine;
 public class PartContainer : MonoBehaviour
 {
     public string Name;
-    public GameObject Prefab;
+    public List<GameObject> Prefabs;
 
     private List<GameObject> InactiveInstances = new List<GameObject>();
 
@@ -25,10 +25,17 @@ public class PartContainer : MonoBehaviour
             return instance;
         }
 
-        var newPart = GameObject.Instantiate(Prefab);
+        var newPart = GameObject.Instantiate(GetRandomPrefab());
         newPart.transform.parent = transform;
         return newPart;
 
+    }
+
+    private GameObject GetRandomPrefab()
+    {
+        var idx = Random.Range(0, Prefabs.Count);
+        Debug.Log(idx);
+        return Prefabs[idx];
     }
 
 
