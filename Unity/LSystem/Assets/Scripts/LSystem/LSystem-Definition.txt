@@ -1,0 +1,10 @@
+﻿F: branch
++: rotate +angle around z-axis
+-: rotate -angle around z-axis
+&: rotate angle around x-axis
+^: rotate -angle around x-axis
+\\: rotate angle around y-axis
+/: rotate -angle around y-axis
+|: rotate 180° around z-axis
+[: push to stack
+]: pop from stack and draw leaves
