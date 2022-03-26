@@ -7,20 +7,20 @@
   <body>
     <a-scene>
 
-      <a-assets timeout="2000">
+      <a-assets>
         <a-asset-item id="sample_tree" src="a_sample_tree.gltf"></a-asset-item>
         
         <!--<img id="panoramic_img" src="panoramic_img.jpg"></a-asset-item>-->
-        <a-entity gltf-model="#sample_tree" position="0 0 0" scale="1 1 1"></a-entity>
         <!--<audio id="ambientSound" src="ambient_connect.mp3"></audio>-->
 
 
       </a-assets>
 
+      <a-entity gltf-model="#sample_tree" position="0 0 -3" scale="0.3 0.3 0.3"></a-entity>
 
 
       
-      <a-plane position="0 0 -4" rotation="-90 0 0" width="4" height="4" color="#7BC8A4"></a-plane>
+      <a-plane position="0 0 -3" rotation="-90 0 0" width="4" height="4" color="#7BC8A4"></a-plane>
       <a-sky color="#ECECEC"></a-sky>
     </a-scene>
   </body>
