@@ -61,13 +61,13 @@ public static class LSystemParser
             {
                 value = line.Substring(line.IndexOf("=") + 1);
                 value = value.Trim();
-                angle = float.Parse(value);
+                angle = float.Parse(value, CultureInfo.InvariantCulture);
             }
             else if (line.IndexOf("number of derivations") != -1)
             {
                 value = line.Substring(line.IndexOf("=") + 1);
                 value = value.Trim();
-                derivations = int.Parse(value);
+                derivations = int.Parse(value, CultureInfo.InvariantCulture);
             }
             else
             {
