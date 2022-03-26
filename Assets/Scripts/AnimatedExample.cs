@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class DataVisMapping : MonoBehaviour
+public class AnimatedExample : MonoBehaviour
 {
 
     public ManualTree Tree;

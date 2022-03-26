@@ -5,8 +5,9 @@ public class LSystemExecutor : MonoBehaviour
 {
     public string rule;
     public string axiom;
-    public float angle = 22.5f;
     public int derivations = 3;
+
+    public bool ImmediateRendering = true;
 
     //public bool useColliders = false;
 
@@ -21,7 +22,15 @@ public class LSystemExecutor : MonoBehaviour
     void Start()
     {
         DeriveFromScratch();
-        BuildTree();
+        if (ImmediateRendering)
+        {
+            BuildTree();
+        }
+    }
+
+    public string ModuleString
+    {
+        get { return moduleString; }
     }
 
 
@@ -29,23 +38,30 @@ public class LSystemExecutor : MonoBehaviour
     {
         Debug.Log("Rebuild tree");
         DeriveFromScratch();
-        DeleteTree();
-        BuildTree();
+        if (ImmediateRendering)
+        {
+            DeleteTree();
+            BuildTree();
+        }
     }
 
     public void Derive()
     {
         DeriveOneStep();
-        DeleteTree();
-        BuildTree();
+        if (ImmediateRendering)
+        {
+            DeleteTree();
+            BuildTree();
+        }
     }
+
 
     private void DeriveOneStep()
     {
 
         currentDerivations += 1;
         var productions = LSystemParser.CreateRules(rule);
-        moduleString = LSystemDeriver.DeriveOneStep(moduleString, angle, productions);
+        moduleString = LSystemDeriver.DeriveOneStep(moduleString, productions);
 
         DeleteTree();
     }
@@ -54,7 +70,7 @@ public class LSystemExecutor : MonoBehaviour
     {
         currentDerivations = derivations;
         var productions = LSystemParser.CreateRules(rule);
-        moduleString = LSystemDeriver.Derive(axiom, angle, derivations, productions);
+        moduleString = LSystemDeriver.Derive(axiom, derivations, productions);
     }
 
     private void DeleteTree()
@@ -77,25 +93,26 @@ public class LSystemExecutor : MonoBehaviour
 
     private void BuildTree()
     {
-        Interpreter.Interpret(
-            angle,
-            moduleString);
+        Interpreter.Interpret(moduleString);
 
         //if(useColliders)
         //{
         //    UpdateColliderBounds(trunk);
         //}
 
-        DebugInfo.text = $"Rule: {rule}\n" +
-            $"Axiom: {axiom}\n" +
-            $"Derivations: {currentDerivations}\n" +
-            $"Angle: {rule}\n" +
-            $"Rule: {Interpreter.segmentRadialSamples}\n" +
-             $"Segment Axial Samples: {Interpreter.segmentAxisSamples}\n" +
-             $"Segment Width/Height: {Interpreter.segmentWidth} {Interpreter.segmentHeight}\n" +
-             $"Leaf Size: {Interpreter.leafSize}\n" +
-             $"Leaf Axial Density: {Interpreter.leafAxialDensity}\n\n" +
-             $"{moduleString}";
+        if (DebugInfo != null)
+        {
+            DebugInfo.text = $"Rule: {rule}\n" +
+                $"Axiom: {axiom}\n" +
+                $"Derivations: {currentDerivations}\n" +
+                $"Angle: {rule}\n" +
+                $"Rule: {Interpreter.segmentRadialSamples}\n" +
+                 $"Segment Axial Samples: {Interpreter.segmentAxisSamples}\n" +
+                 $"Segment Width/Height: {Interpreter.segmentWidth} {Interpreter.segmentHeight}\n" +
+                 $"Leaf Size: {Interpreter.leafSize}\n" +
+                 $"Leaf Axial Density: {Interpreter.leafAxialDensity}\n\n" +
+                 $"{moduleString}";
+        }
     }
 
 

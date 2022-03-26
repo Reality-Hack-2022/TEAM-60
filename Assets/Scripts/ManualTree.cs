@@ -2,10 +2,14 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+
+/// <summary>
+/// Tree is manually defined, not by an L-system.
+/// It uses the same string definition as the L-system.
+/// </summary>
 public class ManualTree : MonoBehaviour
 {
     public string StartTree;
-    public float Angle;
     public LSystemInterpreter Interpreter;
 
 
@@ -61,9 +65,7 @@ public class ManualTree : MonoBehaviour
         DeleteTree();
 
 
-        Interpreter.Interpret(
-            Angle,
-            TreeDefinition);
+        Interpreter.Interpret( TreeDefinition);
 
     }
 

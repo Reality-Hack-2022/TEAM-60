@@ -34,7 +34,6 @@ public class PartContainer : MonoBehaviour
     private GameObject GetRandomPrefab()
     {
         var idx = Random.Range(0, Prefabs.Count);
-        Debug.Log(idx);
         return Prefabs[idx];
     }
 

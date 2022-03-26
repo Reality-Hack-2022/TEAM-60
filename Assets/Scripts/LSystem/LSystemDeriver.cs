@@ -3,18 +3,18 @@ using System.Collections.Generic;
 
 public static class LSystemDeriver
 {
-    public static string Derive(string axiom, float angle, int derivations, Dictionary<string, List<Production>> productions)
+    public static string Derive(string axiom, int derivations, Dictionary<string, List<Production>> productions)
     {
         var moduleString = axiom;
         for (int i = 0; i < Math.Max(1, derivations); i++)
         {
-            moduleString = DeriveOneStep(moduleString, angle, productions);
+            moduleString = DeriveOneStep(moduleString, productions);
         }
         return moduleString;
     }
 
 
-    public static string DeriveOneStep(string axiom, float angle, Dictionary<string, List<Production>> productions)
+    public static string DeriveOneStep(string axiom, Dictionary<string, List<Production>> productions)
     {
         var moduleString = axiom;
         string newModuleString = "";

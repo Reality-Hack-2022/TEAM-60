@@ -46,14 +46,16 @@ public class LSystemInterpreter : MonoBehaviour
 
     }
 
-
+    public float angle = 22.5f;
     /// <summary>
     /// number of triangles per length of branch, no visual effect
     /// </summary>
+    [HideInInspector]
     public int segmentAxisSamples = 3;
     /// <summary>
     /// number of triangles around branch, no visual effect as long as there are enough
     /// </summary>
+    [HideInInspector]
     public int segmentRadialSamples = 3;
     /// <summary>
     /// Thickness of branches
@@ -87,13 +89,17 @@ public class LSystemInterpreter : MonoBehaviour
     public PartContainer LeafContainer;
     public PartContainer BranchContainer;
 
+    Stack<Turtle> stack = null;
+    Turtle current;
+    int currentIdx = 0;
+
     public void Start()
     {
         
     }
 
 
-    public void CreateSegment(Turtle turtle, int nestingLevel)
+    private void CreateSegment(Turtle turtle, int nestingLevel)
     {
         var branch = BranchContainer.GetInstance();
         branch.transform.localPosition = turtle.position;
@@ -106,7 +112,7 @@ public class LSystemInterpreter : MonoBehaviour
 
     }
 
-    public void CreateSegmentProcedural(
+    private void CreateSegmentProcedural(
         Material trunkMaterial,
         Turtle turtle,
         int nestingLevel,
@@ -174,7 +180,7 @@ public class LSystemInterpreter : MonoBehaviour
         currentMesh.Optimize();
     }
 
-    public void AddFoliageAt(
+    private void AddFoliageAt(
         Turtle turtle)
     {
         float xAngleStep = -70 / (float)leafAxialDensity,
@@ -196,11 +202,12 @@ public class LSystemInterpreter : MonoBehaviour
                 //leaf.transform.parent = leaves.transform;
                 leaf.transform.localPosition = turtle.position - (turtle.direction * new Vector3(0, y, 0));
                 leaf.transform.Rotate(new Vector3(xAngle, yAngle, 0));
+                leaf.transform.localScale = new Vector3(leafSize, leafSize, leafSize);
             }
         }
     }
 
-    public void CreateNewChunk(Mesh mesh, ref int count, Material trunkMaterial, GameObject trunk)
+    private void CreateNewChunk(Mesh mesh, ref int count, Material trunkMaterial, GameObject trunk)
     {
         GameObject chunk = new GameObject("Chunk " + (++count));
         chunk.transform.parent = trunk.transform;
@@ -209,7 +216,7 @@ public class LSystemInterpreter : MonoBehaviour
         chunk.AddComponent<MeshFilter>().mesh = mesh;
     }
 
-    public static GameObject CreateLeafBillboard(float leafSize, Material leafMaterial)
+    private static GameObject CreateLeafBillboard(float leafSize, Material leafMaterial)
     {
         GameObject leafBillboard = new GameObject("Leaf");
         leafBillboard.AddComponent<MeshRenderer>().sharedMaterial = leafMaterial;
@@ -217,18 +224,31 @@ public class LSystemInterpreter : MonoBehaviour
         return leafBillboard;
     }
 
-    public void Interpret(
-        float angle,
-        string moduleString)
-    {
-        //GameObject leafBillboard = CreateLeafBillboard(leafSize, leafMaterial);
 
-        int chunkCount = 0;
-        Mesh currentMesh = new Mesh();
-        Dictionary<int, Mesh> segmentsCache = new Dictionary<int, Mesh>();
-        Turtle current = new Turtle(Quaternion.identity, Vector3.zero, new Vector3(0, segmentHeight, 0));
-        Stack<Turtle> stack = new Stack<Turtle>();
-        for (int i = 0; i < moduleString.Length; i++)
+    public void Interpret(string moduleString)
+    {
+        stack = new Stack<Turtle>();
+        current = new Turtle(Quaternion.identity, Vector3.zero, new Vector3(0, segmentHeight, 0));
+        currentIdx = 0;
+        InterpretContinue(moduleString, moduleString.Length);
+    }
+
+
+    public void InterpretContinue(string moduleString, int count)
+    { 
+        if(stack == null)
+        {
+            stack = new Stack<Turtle>();
+            current = new Turtle(Quaternion.identity, Vector3.zero, new Vector3(0, segmentHeight, 0));
+            currentIdx = 0;
+        }
+
+
+        var endIdx = currentIdx + count;
+        if (endIdx > moduleString.Length)
+            endIdx = moduleString.Length;
+
+        for (int i = currentIdx; i < endIdx; i++)
         {
             string module = moduleString[i] + "";
             if (module == "F")
@@ -279,6 +299,8 @@ public class LSystemInterpreter : MonoBehaviour
                 current = stack.Pop();
             }
         }
+
+        currentIdx = endIdx;
         //CreateNewChunk(currentMesh, ref chunkCount, trunkMaterial, trunk);
         //GameObject.Destroy(leafBillboard);
     }
