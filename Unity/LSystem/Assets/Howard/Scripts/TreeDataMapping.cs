@@ -90,7 +90,7 @@ public class TreeDataMapping : MonoBehaviour
     }
 
     public void RebuildSubmeshes () {
-        StartCoroutine (StartRebuildSubmeshes (0.5f));
+        StartCoroutine (StartRebuildSubmeshes (0.3f));
     }
 
     IEnumerator StartRebuildSubmeshes (float delay) {

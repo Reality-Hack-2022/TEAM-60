@@ -83,7 +83,8 @@ public class LSystemExecutor : MonoBehaviour
             var container = child.GetComponent<PartContainer>();
             if (container != null)
             {
-                container.DisableAllItems();
+                // container.DisableAllItems();
+                container.DestroyAllItems ();
             }
             else
             {

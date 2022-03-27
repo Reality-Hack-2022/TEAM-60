@@ -91,6 +91,8 @@ namespace HackTheHack
                 return;
             }
 
+            UIManager.instance.UpdateTitleText ("Loading Data...");
+
             bool shouldSpawn = AllTreeInstances.Count > 0 ? false : true;
 
             //process commit data and then go generate 1 tree per team
@@ -195,6 +197,8 @@ namespace HackTheHack
                 }
                 
                 ListOfExectuors.Add(mapping.lsystem);
+
+                UIManager.instance.UpdateTitleText ("Rebuilding Trees...");                
                 mapping.lsystem.Rebuild();
                 mapping.RebuildSubmeshes();
             }

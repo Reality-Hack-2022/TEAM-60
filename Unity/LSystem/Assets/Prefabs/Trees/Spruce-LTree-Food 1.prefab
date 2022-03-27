@@ -247,7 +247,7 @@ MonoBehaviour:
   rule: F=(1)F[+F]F[-F]F
   axiom: F
   derivations: 4
-  ImmediateRendering: 0
+  ImmediateRendering: 1
   Interpreter: {fileID: 2372305478839724605}
   DebugInfo: {fileID: 0}
 --- !u!114 &2372305478839724605

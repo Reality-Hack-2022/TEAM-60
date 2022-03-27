@@ -1023,7 +1023,7 @@ MonoBehaviour:
   rule: F=(1)F[+++/F][&&/F]F[--/F][^^/F]F
   axiom: F
   derivations: 4
-  ImmediateRendering: 0
+  ImmediateRendering: 1
   Interpreter: {fileID: 8834471354767069199}
   DebugInfo: {fileID: 0}
 --- !u!114 &8834471354767069199

@@ -22,8 +22,6 @@ public class GithubRequester : MonoBehaviour
     [SerializeField]
     public Dictionary <string, List <CommitData>> githubDataDict = new Dictionary<string, List<CommitData>> ();
     [Tooltip("You will need your own GitHub PAT")]//https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token
-    public string githubToken;
-    public string githubUsername;
     public string EventName = "MIT-Reality-Hack-2020";
     public TextMeshPro eventNameText;
     [Tooltip("Change this to match the recent Hackathon")]
@@ -34,21 +32,33 @@ public class GithubRequester : MonoBehaviour
     [TextArea]
     public string jsonResponse;
 
-    // Start is called before the first frame update
-    async Task Start()
-    {
+    public async Task StartLoadGithubData (string userName, string token) {
         // Load Data on start
-        await LoadGithubData ();
+        await LoadGithubData (userName, token);        
     }
-    async Task LoadGithubData () {
+
+    // Start is called before the first frame update
+    // async Task Start ()
+    // {
+    //     // Load Data on start
+    //     await LoadGithubData ();
+    // }
+    async Task LoadGithubData (string userName, string token) {
         ResetData();
-        await GetRepositoryDataHTTP();
+        await GetRepositoryDataHTTP(userName, token);
         for(int i = 0; i < repoNames.Count; i++)
         {
-            await GetCommitDataHTTP(repoNames[i]);
+            await GetCommitDataHTTP(repoNames[i], userName, token);
         }
-        HTH_Publisher.Instance.Call_HTH_GitHubCommitResponse(githubDataDict);
-        await DebugGitHubRateLimitHTTP();
+
+        // Check if there is content in dictionary. If so, activate the player camera & begin the main application.
+        if (githubDataDict.Count > 0) {
+            HTH_Publisher.Instance.Call_HTH_GitHubCommitResponse(githubDataDict);
+            PlayerInputController.instance.ToggleCameraController (true);
+            PlayerInputController.instance.ToggleSimulator (true);
+            UIManager.instance.ToggleLoginInfo (false);            
+        }
+        await DebugGitHubRateLimitHTTP(userName, token);
     }
 
     public void ResetData () {
@@ -69,16 +79,16 @@ public class GithubRequester : MonoBehaviour
     /// https://docs.github.com/en/rest/reference/rate-limit
     /// </summary>
     /// <returns></returns>
-    async Task DebugGitHubRateLimitHTTP()
+    async Task DebugGitHubRateLimitHTTP(string userName, string token)
     {
         using (var client = new HttpClient())
         {
             var method = HttpMethod.Get;
             client.DefaultRequestHeaders.Accept.Clear();
             client.BaseAddress = new Uri("https://api.github.com/rate_limit");
-            client.DefaultRequestHeaders.Add("User-Agent", githubUsername);
+            client.DefaultRequestHeaders.Add("User-Agent", userName);
             client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-            client.DefaultRequestHeaders.Add("Authorization","token " +githubToken);
+            client.DefaultRequestHeaders.Add("Authorization","token " + token);
             var httpRequest = new HttpRequestMessage { Method = method };
             var httpResponse = await client.SendAsync(httpRequest);
           
@@ -94,7 +104,8 @@ public class GithubRequester : MonoBehaviour
             }
             else
             {
-                Debug.LogError($"Failure: {httpResponse.StatusCode}");
+                // Debug.LogError($"Failure: {httpResponse.StatusCode}");
+                UIManager.instance.UpdateRequestResultText ($"Failed: {httpResponse.StatusCode}");
             }
         }
     }
@@ -103,7 +114,7 @@ public class GithubRequester : MonoBehaviour
     /// https://docs.github.com/en/rest/reference/repos
     /// </summary>
     /// <returns></returns>
-    async Task GetRepositoryDataHTTP()
+    async Task GetRepositoryDataHTTP(string userName, string token)
     {
         using (var client = new HttpClient())
         {
@@ -112,8 +123,8 @@ public class GithubRequester : MonoBehaviour
             client.BaseAddress = new Uri(orgDirectory+"repos?per_page=100");
             client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/vnd.github.v3+json"));
             
-            client.DefaultRequestHeaders.Add("User-Agent", githubUsername);
-            client.DefaultRequestHeaders.Add("Authorization", "token " + githubToken);
+            client.DefaultRequestHeaders.Add("User-Agent", userName);
+            client.DefaultRequestHeaders.Add("Authorization", "token " + token);
             
             var httpRequest = new HttpRequestMessage { Method = method };
          
@@ -139,7 +150,8 @@ public class GithubRequester : MonoBehaviour
             }
             else
             {
-                Debug.LogError($"Failure: {httpResponse.StatusCode}");
+                // Debug.LogError($"Failure: {httpResponse.StatusCode}");
+                UIManager.instance.UpdateRequestResultText ($"Failed: {httpResponse.StatusCode}");
             }
         }
     }
@@ -149,16 +161,18 @@ public class GithubRequester : MonoBehaviour
     /// </summary>
     /// <param name="repoName"></param>
     /// <returns></returns>
-    async Task GetCommitDataHTTP(string repoName)
+    async Task GetCommitDataHTTP(string repoName, string userName, string token)
     {
+        UIManager.instance.UpdateTitleText ("Requesting Data...");
+
         using (var client = new HttpClient())
         {
             var method = HttpMethod.Get;
             client.DefaultRequestHeaders.Accept.Clear();
             client.BaseAddress = new Uri(orgRepos + repoName + "/commits");
             client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/vnd.github.v3+json"));
-            client.DefaultRequestHeaders.Add("User-Agent", githubUsername);
-            client.DefaultRequestHeaders.Add("Authorization", "token " + githubToken);
+            client.DefaultRequestHeaders.Add("User-Agent", userName);
+            client.DefaultRequestHeaders.Add("Authorization", "token " + token);
             client.DefaultRequestHeaders.Add("page", "1");
             client.DefaultRequestHeaders.Add("per_page", "75");
             var httpRequest = new HttpRequestMessage { Method = method };
@@ -168,6 +182,8 @@ public class GithubRequester : MonoBehaviour
             {
                 var responseContent = await httpResponse.Content.ReadAsStringAsync();
                 Debug.LogWarning($"Success: { responseContent}, {httpResponse.RequestMessage}");
+
+                UIManager.instance.UpdateTitleText ("Data Received!");
                 JSONNode commitInfo = JSON.Parse(responseContent);
 
                 List<CommitData> dataset = new List<CommitData>();
@@ -218,7 +234,7 @@ public class GithubRequester : MonoBehaviour
             }
             else
             {
-
+                // UIManager.instance.UpdateRequestResultText ($"Failed: {httpResponse.StatusCode}");
                 //Debug.LogError($"Failure: {httpResponse.StatusCode} with message: {httpResponse.RequestMessage}");
             }
         }
@@ -229,8 +245,8 @@ public class GithubRequester : MonoBehaviour
     #region Unity WebRequest Methods - not being used
     IEnumerator DebugGithubRateLimit () {
         UnityWebRequest request = UnityWebRequest.Get ("https://api.github.com/rate_limit");
-        request.SetRequestHeader ("User-Agent", githubUsername);
-        request.SetRequestHeader ("Authorization", "token " + githubToken);
+        request.SetRequestHeader ("User-Agent", "githubUsername");
+        request.SetRequestHeader ("Authorization", "token ");
 
         yield return request.SendWebRequest();
 
@@ -249,8 +265,8 @@ public class GithubRequester : MonoBehaviour
     IEnumerator GetRepositoryData () {
 
         UnityWebRequest request = UnityWebRequest.Get (orgDirectory + "repos");
-        request.SetRequestHeader ("User-Agent", githubUsername);
-        request.SetRequestHeader ("Authorization", "token " + githubToken);
+        request.SetRequestHeader ("User-Agent", "githubUsername");
+        request.SetRequestHeader ("Authorization", "token ");
         // request.SetRequestHeader ("per_page", "100");
 
         yield return request.SendWebRequest();
@@ -301,8 +317,8 @@ public class GithubRequester : MonoBehaviour
 
         Debug.Log ("Requesting Commit data from: " + repoName);
         UnityWebRequest request = UnityWebRequest.Get (orgDirectory + repoName + "/commits");
-        request.SetRequestHeader ("User-Agent", githubUsername);
-        request.SetRequestHeader ("Authorization", "token " + githubToken);
+        request.SetRequestHeader ("User-Agent", "githubUsername");
+        request.SetRequestHeader ("Authorization", "token ");
 
         yield return request.SendWebRequest();
 
