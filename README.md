@@ -1,4 +1,5 @@
-# TEAM-60 - TeamTrees
+![](https://codimd.s3.shivering-isles.com/demo/uploads/53d334c1972b5684109a8e19a.png)
+
 
 ## Inspiration
 During a hackathon, organisers are swamped with ensuring smooth running of events. It becomes tricky to ensure hacker teams have a great hacking experience, especially for newer hackers.
