@@ -3,7 +3,17 @@ guid: 698c99f03ef4e8044a5a89f5bdb68c5e
 ModelImporter:
   serializedVersion: 20200
   internalIDToNameTable: []
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: FlowerLeavesRed
+    second: {fileID: 2100000, guid: e8d52f5cbf79af5469dad49aea943aec, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: FlowerMiddle
+    second: {fileID: 2100000, guid: 57b6009c94e295548a0909ba7878c974, type: 2}
   materials:
     materialImportMode: 2
     materialName: 0
@@ -31,7 +41,7 @@ ModelImporter:
     extraExposedTransformPaths: []
     extraUserProperties: []
     clipAnimations: []
-    isReadable: 0
+    isReadable: 1
   meshes:
     lODScreenPercentages: []
     globalScale: 1

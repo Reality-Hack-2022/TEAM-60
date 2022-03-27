@@ -32,8 +32,22 @@ namespace HackTheHack
         [Space]
         [Tooltip("MinMax Clamp Values for Segment Width")]
         public Vector2 Clamp_SegmentWidth = new Vector2(0.25f, 2f);
+        public GameObject [] TreePrefabs;
         public GameObject TreePrefab;
-        public List<GameObject> AllTreeInstances = new List<GameObject>();
+        public Dictionary <string, GameObject> AllTreeInstances = new Dictionary<string, GameObject> ();
+
+
+        public float min_Angle = 25f;
+        public float max_Angle = 45f;
+        public float min_SegmentWidth = 0.2f;
+        public float max_SegmentWidth = 2f;
+        public float min_SegmentHeight = 0.5f;
+        public float max_SegmentHeight = 3f;
+        public float min_LeafSize = 0.5f;
+        public float max_LeafSize = 1.5f;
+        public Vector3 RandomPositionScale = new Vector3(50f, 0, 50f);
+
+
         
         //Dictionary<string, List<CommitData>> CommitData;
         /// <summary>
@@ -56,17 +70,27 @@ namespace HackTheHack
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="data"></param>
-        private void OnGitHubCommitResponse(object sender, Dictionary<string, List<CommitData>> data)
+        private async void OnGitHubCommitResponse(object sender, Dictionary<string, List<CommitData>> data)
         {
             //cache data locally
             //CommitData = data;
 
             //destroy the trees
-            for (int i=0;i< AllTreeInstances.Count; i++)
-            {
-                Destroy(AllTreeInstances[i]);
+            // for (int i=0;i< AllTreeInstances.Count; i++)
+            // {
+            //     Destroy(AllTreeInstances[i]);
+            // }
+            // AllTreeInstances.Clear();
+
+            if (data.Count <= 0) {
+                foreach (string key in AllTreeInstances.Keys) {
+                    AllTreeInstances [key].SetActive (false);
+                }
+
+                return;
             }
-            AllTreeInstances.Clear();
+
+            bool shouldSpawn = AllTreeInstances.Count > 0 ? false : true;
 
             //process commit data and then go generate 1 tree per team
             List<LSystemExecutor> ListOfExectuors = new List<LSystemExecutor>();
@@ -79,64 +103,114 @@ namespace HackTheHack
             for (int j = 0; j < allDictionaryKeys.Count; j++)
             {
 
-                var aKey = allDictionaryKeys[j]; ;
-                var oneTeam = data[aKey];
+                string aKey = allDictionaryKeys[j]; ;
+                List <CommitData> oneTeam = data[aKey];
                 
                 Debug.LogWarning($"Building the {aKey} tree");
+
+                if (shouldSpawn) {
+                    //generate the visual placeholder - scatter the flowers in a 10x10m area.
+                    float x = UnityEngine.Random.Range (-10f, 10f)* RandomPositionScale.x;
+                    float y = 0f;
+                    float z = UnityEngine.Random.Range (-10f, 10f)* RandomPositionScale.z;
+                    float yRot = UnityEngine.Random.Range (0, 360);
+                    int prefabIndex = UnityEngine.Random.Range (0, TreePrefabs.Length); 
+
+                    var aTree = GameObject.Instantiate(TreePrefabs [prefabIndex], this.transform.position + new Vector3(x, y, z), Quaternion.Euler (0, yRot, 0));
+                    AllTreeInstances.Add(aKey, aTree);
+
+                    aTree.gameObject.name = aKey;                    
+                }
+                TreeDataMapping mapping = AllTreeInstances [aKey].GetComponent <TreeDataMapping> ();
+                
+
+                // Calculate Mapping Weights
+                float commitWeight = DataProcessor.instance.NormalizeCommitWeight (oneTeam.Count);
+                float contributorWeight = DataProcessor.instance.NormalizeContributors (oneTeam);
+                float messageWeight = DataProcessor.instance.NormalizeCommitMessages (oneTeam);
+
+                Debug.Log (aKey + "'s commitWeight: " + commitWeight + ", contributorWeight: " + contributorWeight + ", messageWeight: " + messageWeight);
+
+                // Create a Tree Data Scriptable Object instance.
                 var adataTree = ScriptableObject.CreateInstance<HTH_Tree_Data>();
                 AllGeneratedScriptableObjects.Add(adataTree);
-                //generate the visual placeholder - move it on the z axis 1.25 meters forward
-                var aTree = GameObject.Instantiate(TreePrefab, this.transform.position + new Vector3(0, 0, 1.25f*j), Quaternion.identity);
 
-                aTree.gameObject.name = aKey;
-                LSystemExecutor Executor = aTree.GetComponent<LSystemExecutor>();
-                LSystemInterpreter Interpreter = aTree.GetComponent<LSystemInterpreter>();
-                //generate the data we don't have as a default
-                Interpreter.LeafContainer.Prefabs = LeafPrefabs;
-                Interpreter.BranchContainer.Prefabs = BranchPrefabs;
+                // Interpreter.LeafContainer.Prefabs = LeafPrefabs;
+                // Interpreter.BranchContainer.Prefabs = BranchPrefabs;
 
-                //Start making up some placeholders for the data
+                // Apply the mapping weights to the tree parameters
                 adataTree.TeamName = aKey;
-                adataTree.Angle = Mathf.Min(Mathf.Max(MinMax_TreeAngle.x, oneTeam.Count), MinMax_TreeAngle.y);
-                //AllGeneratedScriptableObjects.Add(adataTree);
-                //time span from first to last commit
-                float hoursFirstTOLast = 0;
-                var averageBetweenCommits = AverageTimeBetweenCommits(oneTeam, ref hoursFirstTOLast);
-                var segmentWidthNormalized = (float)averageBetweenCommits / MaxSecondsBetweenCommits;
-                adataTree.SegmentWidth = Mathf.Clamp(segmentWidthNormalized, Clamp_SegmentWidth.x, Clamp_SegmentWidth.y);
-                adataTree.Derivations = oneTeam.Count % ModulusValue;
-                if (adataTree.Derivations == 0)
+
+                // Set the Angle based on the total number of commits relative to the highest commit number
+                adataTree.Angle = min_Angle + ((max_Angle - min_Angle) * commitWeight);
+                // adataTree.Angle = Mathf.Min(Mathf.Max(MinMax_TreeAngle.x, oneTeam.Count), MinMax_TreeAngle.y);
+
+                // // Set the Axiom based on the ???
+                // adataTree.Axiom = "";
+
+                // Set the Segment Width & Height based on the number of contributors
+                adataTree.SegmentWidth = min_SegmentWidth + ((max_SegmentWidth - min_SegmentWidth) * contributorWeight);
+                adataTree.SegmentHeight = min_SegmentWidth + ((max_SegmentWidth - min_SegmentWidth) * contributorWeight);
+
+                // Set the Leaf Size based on the quality of commit messages
+                adataTree.LeafSize = min_LeafSize + ((max_LeafSize - min_LeafSize) * messageWeight);
+
+                // // Turn on thicker tree branches once the timeline has passed the hackathon 1/3 point.
+                // adataTree.NarrowBranches = time > 0.3f ? false : true;
+
+                // // Turn on tree foliage once the timeline has passed the hackathon 2/3 point.
+                // adataTree.UseFoliage = time > 0.5f ? true : false;
+                
+
+
+                // //time span from first to last commit
+                // float hoursFirstTOLast = 0;
+                // var averageBetweenCommits = AverageTimeBetweenCommits(oneTeam, ref hoursFirstTOLast);
+                // var segmentWidthNormalized = (float)averageBetweenCommits / MaxSecondsBetweenCommits;
+
+
+                if (mapping.lsystem != null)
                 {
-                    adataTree.Derivations = ModulusValue;
+                    // mapping.lsystem.rule = adataTree.Rule;
+                    // mapping.lsystem.axiom = adataTree.Axiom;
+                    // mapping.lsystem.derivations = adataTree.Derivations;
                 }
-                AllTreeInstances.Add(aTree);
-                if (Executor != null)
+                if (mapping.lsystemRenderer != null)
                 {
-                    Executor.rule = adataTree.Rule;
-                    Executor.axiom = adataTree.Axiom;
-                    Executor.derivations = adataTree.Derivations;
+                    mapping.lsystemRenderer.angle = adataTree.Angle;
+                    // mapping.lsystemRenderer.segmentAxisSamples = adataTree.SegmentAxisSamples;
+                    // mapping.lsystemRenderer.segmentRadialSamples = adataTree.SegmentRadialSamples;
+                    mapping.lsystemRenderer.segmentWidth = adataTree.SegmentWidth;
+                    mapping.lsystemRenderer.segmentHeight = adataTree.SegmentHeight;
+                    mapping.lsystemRenderer.leafSize = adataTree.LeafSize;
+                    // mapping.lsystemRenderer.leafAxialDensity = adataTree.LeafAxialDensity;
+                    // mapping.lsystemRenderer.leafRadialDensity = adataTree.LeafRadialDensity;
+                    mapping.lsystemRenderer.useFoliage = adataTree.UseFoliage;
+                    mapping.lsystemRenderer.narrowBranches = adataTree.NarrowBranches;
                 }
-                if (Interpreter != null)
-                {
-                    Interpreter.angle = adataTree.Angle;
-                    Interpreter.segmentAxisSamples = adataTree.SegmentAxisSamples;
-                    Interpreter.segmentRadialSamples = adataTree.SegmentRadialSamples;
-                    Interpreter.segmentWidth = adataTree.SegmentWidth;
-                    Interpreter.segmentHeight = adataTree.SegmentHeight;
-                    Interpreter.leafSize = adataTree.LeafSize;
-                    Interpreter.leafAxialDensity = adataTree.LeafAxialDensity;
-                    Interpreter.leafRadialDensity = adataTree.LeafRadialDensity;
-                    Interpreter.useFoliage = adataTree.UseFoliage;
-                    Interpreter.narrowBranches = adataTree.NarrowBranches;
-                }
-                ListOfExectuors.Add(Executor);
+                
+                ListOfExectuors.Add(mapping.lsystem);
             }
-            
+
+            // Rebuild the Trees with Updated parameters
             for (int x = 0; x < ListOfExectuors.Count; x++)
             {
                 ListOfExectuors[x].Rebuild();
+
+            }
+
+            // Hide all other Trees
+            foreach (string key in AllTreeInstances.Keys) {
+                if (data.ContainsKey (key)) {
+                    AllTreeInstances [key].SetActive (true);
+                }
+
+                else {
+                    AllTreeInstances [key].SetActive (false);
+                }
             }
         }
+        
         private double AverageTimeBetweenCommits(List<CommitData> teamCommits, ref float totalHourSpan)
         {
             List<DateTime> allTimes = new List<DateTime>();

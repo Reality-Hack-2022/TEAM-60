@@ -1,11 +1,13 @@
 using UnityEngine;
 using System.Collections.Generic;
-
+using UnityEngine.Events;
 public class LSystemExecutor : MonoBehaviour
 {
     public string rule;
     public string axiom;
     public int derivations = 3;
+    
+
 
     public bool ImmediateRendering = true;
 
@@ -85,8 +87,15 @@ public class LSystemExecutor : MonoBehaviour
             }
             else
             {
-
-                Destroy(transform.GetChild(i).gameObject);
+                if (!transform.GetChild(i).gameObject.CompareTag("SubMesh"))
+                {
+                    if (!transform.GetChild(i).gameObject.CompareTag("FoodSource"))
+                    {
+                        Destroy(transform.GetChild(i).gameObject);
+                    }
+                    
+                }
+                
             }
         }
     }
