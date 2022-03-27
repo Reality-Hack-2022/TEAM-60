@@ -48,4 +48,12 @@ public class PartContainer : MonoBehaviour
             InactiveInstances.Add(item.gameObject);
         }
     }
+
+    public void DestroyAllItems() {
+        for(int i = 0; i < transform.childCount; i++)
+        {
+            var item = transform.GetChild(i);
+            Destroy (item.gameObject);
+        }        
+    }
 }

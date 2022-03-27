@@ -52,6 +52,8 @@ namespace HackTheHack
             Parent.position = oldLocation;
             Parent.rotation = oldRotation;
             Parent.localScale = oldScale;
+
+            UIManager.instance.UpdateTitleText ("Trees Built!");
             //StartCoroutine(WaitEndFrameResetMesh(RenderParent));
         }
         IEnumerator WaitEndFrameResetMesh(GameObject RenderParent)

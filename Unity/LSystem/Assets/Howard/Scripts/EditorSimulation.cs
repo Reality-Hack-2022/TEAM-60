@@ -12,18 +12,21 @@ public class EditorSimulation : MonoBehaviour
     private void Update() {
         
         if (Input.GetKeyDown (KeyCode.RightArrow) && requester != null) {
-            HTH_Publisher.Instance.Call_HTH_GitHubCommitResponse (GetCommitDataFromIndex (currCommitIndex));
-            Debug.Log ("Curr Commit Index: " + currCommitIndex);
-            currCommitIndex++;
+            UpdateCommitIndex (true);
         }
 
         if (Input.GetKeyDown (KeyCode.LeftArrow) && requester != null) {
-            HTH_Publisher.Instance.Call_HTH_GitHubCommitResponse (GetCommitDataFromIndex (currCommitIndex));
-            Debug.Log ("Curr Commit Index: " + currCommitIndex);
-            currCommitIndex--;
+            UpdateCommitIndex (false);
         }
     }
 
+    public void UpdateCommitIndex (bool next) {
+        currCommitIndex = next ? currCommitIndex + 1 : currCommitIndex - 1 ;    
+        UIManager.instance.UpdateCommitIndexText (currCommitIndex);
+
+        HTH_Publisher.Instance.Call_HTH_GitHubCommitResponse (GetCommitDataFromIndex (currCommitIndex));
+        Debug.Log ("Curr Commit Index: " + currCommitIndex);
+    }
 
     public Dictionary <string, List <CommitData>> GetCommitDataFromIndex (int index) {
         Dictionary<string, List<CommitData>> dict = requester.githubDataDict;
