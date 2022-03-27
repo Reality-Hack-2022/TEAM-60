@@ -45,7 +45,8 @@ namespace HackTheHack
         public float max_SegmentHeight = 3f;
         public float min_LeafSize = 0.5f;
         public float max_LeafSize = 1.5f;
-        public Vector3 RandomPositionScale = new Vector3(50f, 0, 50f);
+        public float min_SpawnRadius = 4f;
+        public float max_SpawnRadius = 8f;
 
 
         
@@ -110,20 +111,24 @@ namespace HackTheHack
 
                 if (shouldSpawn) {
                     //generate the visual placeholder - scatter the flowers in a 10x10m area.
-                    float x = UnityEngine.Random.Range (-10f, 10f)* RandomPositionScale.x;
-                    float y = 0f;
-                    float z = UnityEngine.Random.Range (-10f, 10f)* RandomPositionScale.z;
+                    
+                    float x = UnityEngine.Random.Range (-1f, 1f);
+                    float z = UnityEngine.Random.Range (-1f, 1f);
+
+                    float radius = UnityEngine.Random.Range (min_SpawnRadius, max_SpawnRadius);
+                    Vector2 offset = new Vector2 (x, z).normalized * radius;
+
                     float yRot = UnityEngine.Random.Range (0, 360);
                     int prefabIndex = UnityEngine.Random.Range (0, TreePrefabs.Length); 
 
-                    var aTree = GameObject.Instantiate(TreePrefabs [prefabIndex], this.transform.position + new Vector3(x, y, z), Quaternion.Euler (0, yRot, 0));
+                    var aTree = GameObject.Instantiate(TreePrefabs [prefabIndex], this.transform.position + new Vector3(offset.x, 0, offset.y), Quaternion.Euler (0, yRot, 0));
                     AllTreeInstances.Add(aKey, aTree);
 
-                    aTree.gameObject.name = aKey;                    
+                    aTree.gameObject.name = aKey;     
+                    AllTreeInstances [aKey].GetComponent <TreeDataMapping> ().InitLabel ();
                 }
                 TreeDataMapping mapping = AllTreeInstances [aKey].GetComponent <TreeDataMapping> ();
                 
-
                 // Calculate Mapping Weights
                 float commitWeight = DataProcessor.instance.NormalizeCommitWeight (oneTeam.Count);
                 float contributorWeight = DataProcessor.instance.NormalizeContributors (oneTeam);
@@ -190,14 +195,15 @@ namespace HackTheHack
                 }
                 
                 ListOfExectuors.Add(mapping.lsystem);
+                mapping.lsystem.Rebuild();
+                mapping.RebuildSubmeshes();
             }
 
-            // Rebuild the Trees with Updated parameters
-            for (int x = 0; x < ListOfExectuors.Count; x++)
-            {
-                ListOfExectuors[x].Rebuild();
-
-            }
+            // // Rebuild the Trees with Updated parameters
+            // for (int x = 0; x < ListOfExectuors.Count; x++)
+            // {
+            //     ListOfExectuors[x].Rebuild();
+            // }
 
             // Hide all other Trees
             foreach (string key in AllTreeInstances.Keys) {

@@ -12,6 +12,7 @@ TagManager:
   - FoodSource
   - outBounds
   - SubMesh
+  - Label
   layers:
   - Default
   - TransparentFX

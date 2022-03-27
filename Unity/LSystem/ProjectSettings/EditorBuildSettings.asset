@@ -4,5 +4,8 @@
 EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
-  m_Scenes: []
+  m_Scenes:
+  - enabled: 1
+    path: Assets/Scenes/New_Bee_Sim_Prefab.unity
+    guid: 781841ebd2bb472419add7c8c7bdf0c6
   m_configObjects: {}

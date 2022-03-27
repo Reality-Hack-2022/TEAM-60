@@ -8,6 +8,8 @@ using HackTheHack;
 using UnityEngine;
 using SimpleJSON;
 using System;
+using TMPro;
+
 /// <summary>
 /// Helps pull down some GitHub Data
 /// In order to use this class for 2022
@@ -22,6 +24,8 @@ public class GithubRequester : MonoBehaviour
     [Tooltip("You will need your own GitHub PAT")]//https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token
     public string githubToken;
     public string githubUsername;
+    public string EventName = "MIT-Reality-Hack-2020";
+    public TextMeshPro eventNameText;
     [Tooltip("Change this to match the recent Hackathon")]
     public string orgDirectory = "https://api.github.com/orgs/MIT-Reality-Hack-2020/";
     [Tooltip("Change this to match the recent Hackathon")]
@@ -29,6 +33,7 @@ public class GithubRequester : MonoBehaviour
     //Testing Variables
     [TextArea]
     public string jsonResponse;
+
     // Start is called before the first frame update
     async Task Start()
     {
@@ -126,6 +131,10 @@ public class GithubRequester : MonoBehaviour
                 {
                     repoNames.Add(orgInfo[i]["name"]);
                     Debug.Log($"Adding repo: {orgInfo[i]["name"]}");
+                }
+
+                if (eventNameText) {
+                    eventNameText.text = EventName;
                 }
             }
             else

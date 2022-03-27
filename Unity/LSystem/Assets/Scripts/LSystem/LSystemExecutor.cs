@@ -91,7 +91,9 @@ public class LSystemExecutor : MonoBehaviour
                 {
                     if (!transform.GetChild(i).gameObject.CompareTag("FoodSource"))
                     {
-                        Destroy(transform.GetChild(i).gameObject);
+                        if (!transform.GetChild(i).gameObject.CompareTag("Label")) {
+                            Destroy(transform.GetChild(i).gameObject);
+                        }
                     }
                     
                 }

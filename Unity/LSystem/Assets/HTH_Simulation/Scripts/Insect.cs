@@ -26,6 +26,8 @@ namespace HackTheHack.Simulation
         public GameObject FoodSource;
         private bool _spawned;
         private System.Random RngControl;
+        public AudioSource pickupSound;
+
         void Start()
         {
             foodStatus = false;
@@ -43,6 +45,10 @@ namespace HackTheHack.Simulation
         }
         public void Finding_Food(bool foodS, float foodA)
         {
+            if (pickupSound) {
+                pickupSound.Play();
+            }
+
             if (foodS)
             {
                 foodStatus = true;
@@ -53,7 +59,6 @@ namespace HackTheHack.Simulation
                 foodStatus = false;
                 foodValue = 0;
             }
-
         }
 
         void Update()
